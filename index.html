@@ -17,11 +17,38 @@
         padding: 0;
       }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   </head>
   <body>
+    <select id="datasetsDropdown">
+    </select>
+    <button type="button" class="btn btn-primary" onclick="onDatasetView()">View</button>
+    <button type="button" class="btn btn-primary" onclick="viewAll()">View All</button>
+
     <div id="map"></div>
     <script>
+      var dataset = null;
+      $(document).read(function()) {
+        $.get("https://nitheeshkl.github.io/wwemaps/data/data.json", function (data, status) {
+          if (data != null) {
+            dataset = data;
+            $("#datasetsDropdown").empty()
+            for (var datasetname in dataset){
+              $("#datasetsDropdown").append($("<option></option>").attr("value",datasetname).text(datasetname));
+            }
+          }
+        });
+      }
 
+      function onDatasetView() {
+          var datasetDropdown = document.getElementById("datasetsDropdown");
+          var datasetname = datasetDropdown.options[datasetDropdown.selectedIndex].value;
+          data = dataset[datasetname];
+      }
+
+      function viewAll() {
+        alert("view all");
+      }
       // This example creates a 2-pixel-wide red polyline showing the path of
       // the first trans-Pacific flight between Oakland, CA, and Brisbane,
       // Australia which was made by Charles Kingsford Smith.
