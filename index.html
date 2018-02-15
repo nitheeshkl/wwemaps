@@ -20,15 +20,18 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   </head>
   <body>
-    <select id="datasetsDropdown">
-    </select>
-    <button type="button" class="btn btn-primary" onclick="onDatasetView()">View</button>
-    <button type="button" class="btn btn-primary" onclick="viewAll()">View All</button>
-
+    <div id="datasetSelection">
+      <strong>Datasets: </strong>
+      <select id="datasetsDropdown">
+      </select>
+      <button type="button" class="btn btn-primary" onclick="onDatasetView()">View</button>
+      <button type="button" class="btn btn-primary" onclick="viewAll()">View All</button>
+    </div>
+    <br/>
     <div id="map"></div>
     <script>
       var dataset = null;
-      $(document).read(function()) {
+      $(document).ready(function(){
         $.get("https://nitheeshkl.github.io/wwemaps/data/data.json", function (data, status) {
           if (data != null) {
             dataset = data;
@@ -36,46 +39,91 @@
             for (var datasetname in dataset){
               $("#datasetsDropdown").append($("<option></option>").attr("value",datasetname).text(datasetname));
             }
+            onDatasetView();
           }
         });
-      }
+      });
 
       function onDatasetView() {
           var datasetDropdown = document.getElementById("datasetsDropdown");
           var datasetname = datasetDropdown.options[datasetDropdown.selectedIndex].value;
           data = dataset[datasetname];
+          drawRoute(datasetname, data, "#FF0000");
       }
 
       function viewAll() {
-        alert("view all");
+        initMap();
+        for (var datasetname in dataset){
+          drawRoute(datasetname, dataset[datasetname], "#0000FF");
+        }
       }
       // This example creates a 2-pixel-wide red polyline showing the path of
       // the first trans-Pacific flight between Oakland, CA, and Brisbane,
       // Australia which was made by Charles Kingsford Smith.
 
+      var map, infowindow;
       function initMap() {
-        var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 3,
-          center: {lat: 0, lng: -180},
-          mapTypeId: 'terrain'
-        });
-
-        var flightPlanCoordinates = [
-          {lat: 37.772, lng: -122.214},
-          {lat: 21.291, lng: -157.821},
-          {lat: -18.142, lng: 178.431},
-          {lat: -27.467, lng: 153.027}
-        ];
-        var flightPath = new google.maps.Polyline({
-          path: flightPlanCoordinates,
-          geodesic: true,
-          strokeColor: '#FF0000',
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
-
-        flightPath.setMap(map);
+        map = new google.maps.Map(document.getElementById('map'), {
+                 center: {lat: -34.397, lng: 150.644},
+                 zoom: 8
+               });
+        infowindow = new google.maps.InfoWindow();
       }
+      var startSymbol = {
+          path: 'M -2,0 0,-2 2,0 0,2 z',
+          strokeColor: '#00FF00',
+          fillColor: '#00FF00',
+          fillOpacity: 1
+      };
+      var stopSymbol = {
+          path: 'M -2,0 0,-2 2,0 0,2 z',
+          strokeColor: '#FF0000',
+          fillColor: '#FF0000',
+          fillOpacity: 1
+      };
+
+      function drawRoute(dataset, data, color) {
+        if (data != null) {
+          coords = data;
+          if (coords.length > 0) {
+            map.setCenter(new google.maps.LatLng(coords[0].lat, coords[0].lng));
+            map.setZoom(14);
+
+            routeMap = new google.maps.Polyline({
+              path: coords,
+              geodesic: true,
+              strokeColor: color,
+              strokeOpacity: 1.0,
+              //strokeWeight: 5,
+              icons: [
+                  {
+                      icon: startSymbol,
+                      offset: '0%'
+                  },
+                  {
+                      icon: stopSymbol,
+                      offset: '100%'
+                  }
+              ],
+              map: map
+            });
+            createInfoWindow(routeMap, dataset);
+          }
+        }
+      }
+
+      function createInfoWindow(poly, content) {
+
+          google.maps.event.addListener(poly, 'click', function(event) {
+              // infowindow.content = content;
+              infowindow.setContent(content);
+
+              // infowindow.position = event.latLng;
+              infowindow.setPosition(event.latLng);
+              infowindow.open(map);
+          });
+      }
+
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3e2k6tkc9Tc65oWB92EhMZVVTgHI0UdE&callback=initMap"
         async defer></script>
