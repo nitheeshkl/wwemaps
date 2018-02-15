@@ -35,10 +35,16 @@
         $.get("https://nitheeshkl.github.io/wwemaps/data/data.json", function (data, status) {
           if (data != null) {
             dataset = data;
+            var datasets = [];
             $("#datasetsDropdown").empty()
             for (var datasetname in dataset){
-              $("#datasetsDropdown").append($("<option></option>").attr("value",datasetname).text(datasetname));
+              datasets.push(datasetname);
             }
+            datasets.sort();
+            datasets.reverse();
+            datasets.forEach(function (item) {
+              $("#datasetsDropdown").append($("<option></option>").attr("value",item).text(item));
+            });
             onDatasetView();
           }
         });
