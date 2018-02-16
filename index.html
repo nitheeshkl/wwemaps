@@ -26,6 +26,7 @@
       </select>
       <button type="button" class="btn btn-primary" onclick="onDatasetView()">View</button>
       <button type="button" class="btn btn-primary" onclick="viewAll()">View All</button>
+      <span id="loading"></span>
     </div>
     <br/>
     <div id="map"></div>
@@ -33,24 +34,28 @@
       var dataset = null;
       $(document).ready(function(){
         loc = window.location.search.substr(1);
-        $.get("http://wweroutes.online/data/data.json", function (data, status) {
-          if (data != null) {
-            dataset = data[loc];
-            if (dataset != null) {
-              var datasets = [];
-              $("#datasetsDropdown").empty()
-              for (var datasetname in dataset){
-                datasets.push(datasetname);
+        if (loc != null) {
+          $("#loading").text("fetching data...");
+          $.get("http://wweroutes.online/data/data.json", function (data, status) {
+            $("#loading").text("");
+            if (data != null) {
+              dataset = data[loc];
+              if (dataset != null) {
+                var datasets = [];
+                $("#datasetsDropdown").empty()
+                for (var datasetname in dataset){
+                  datasets.push(datasetname);
+                }
+                datasets.sort();
+                datasets.reverse();
+                datasets.forEach(function (item) {
+                  $("#datasetsDropdown").append($("<option></option>").attr("value",item).text(item));
+                });
+                onDatasetView();
               }
-              datasets.sort();
-              datasets.reverse();
-              datasets.forEach(function (item) {
-                $("#datasetsDropdown").append($("<option></option>").attr("value",item).text(item));
-              });
-              onDatasetView();
             }
-          }
-        });
+          });
+        }
       });
 
       function onDatasetView() {
@@ -62,9 +67,11 @@
 
       function viewAll() {
         initMap();
+        $("#loading").text("drawing routes...");
         for (var datasetname in dataset){
           drawRoute(datasetname, dataset[datasetname], "#0000FF");
         }
+        $("#loading").text("");
       }
       // This example creates a 2-pixel-wide red polyline showing the path of
       // the first trans-Pacific flight between Oakland, CA, and Brisbane,
