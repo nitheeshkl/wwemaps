@@ -32,20 +32,23 @@
     <script>
       var dataset = null;
       $(document).ready(function(){
-        $.get("https://nitheeshkl.github.io/wwemaps/data/data.json", function (data, status) {
+        loc = window.location.search.substr(1);
+        $.get("http://wweroutes.online/data/data.json", function (data, status) {
           if (data != null) {
-            dataset = data;
-            var datasets = [];
-            $("#datasetsDropdown").empty()
-            for (var datasetname in dataset){
-              datasets.push(datasetname);
+            dataset = data[loc];
+            if (dataset != null) {
+              var datasets = [];
+              $("#datasetsDropdown").empty()
+              for (var datasetname in dataset){
+                datasets.push(datasetname);
+              }
+              datasets.sort();
+              datasets.reverse();
+              datasets.forEach(function (item) {
+                $("#datasetsDropdown").append($("<option></option>").attr("value",item).text(item));
+              });
+              onDatasetView();
             }
-            datasets.sort();
-            datasets.reverse();
-            datasets.forEach(function (item) {
-              $("#datasetsDropdown").append($("<option></option>").attr("value",item).text(item));
-            });
-            onDatasetView();
           }
         });
       });
